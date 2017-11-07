@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:dwr="http://www.directwebremoting.org/schema/spring-dwr"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                           http://www.directwebremoting.org/schema/spring-dwr http://www.directwebremoting.org/schema/spring-dwr-3.0.xsd">
+
+        <!-- dwr need -->
+        <dwr:configuration />
+        <dwr:annotation-scan base-package="com.realTimeMessage" scanDataTransferObject="true" scanRemoteProxy="true"/>
+        <context:component-scan base-package="com.realTimeMessage"/>
+        <!-- **************************************************************************** -->
+        <mvc:annotation-driven/>
+        <mvc:default-servlet-handler/>
+
+        <!-- 注解开启 -->
+        <!--<context:component-scan base-package="com.realTimeMessage"/>-->
+        <!-- aop 开启 -->
+
+        <aop:aspectj-autoproxy proxy-target-class="true"/>
+
+        <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+                <property name="prefix" value="/WEB-INF/"/>
+                <property name="suffix" value=".jsp"/>
+        </bean>
+
+        <!--
+                配置视图解析器
+                order值越小 优先级越高
+                InternalResourceViewResolver的优先级是最低的
+        -->
+        <bean name="beanNameViewResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver">
+                <property name="order" value="10"/>
+        </bean>
+
+</beans>
