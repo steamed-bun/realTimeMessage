@@ -12,7 +12,7 @@
             var stompClient = Stomp.over(s);
             stompClient.connect({}, function () {
                 console.log('notice socket connected!');
-                stompClient.subscribe('/queue/position-updates', function (data) {
+                stompClient.subscribe('/user/test/queue/position-updates', function (data) {
                     console.log(data+"@@@@@@@@@@@@");
 //                    $('.message span.content').html(data.body);
                 });

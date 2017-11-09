@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>socket</title>
     <script src="http://cdn.sockjs.org/sockjs-0.3.min.js"></script>
+    <script src="jquery.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.js"></script>
     <script>
         var stompClient = null;
@@ -18,10 +19,51 @@
 //            var socket = new SockJS('/myHandler');
             var socket = new SockJS('/portfolio');
             stompClient = Stomp.over(socket);
+            console.log("connect...");
+        }
+
+        //普通广播的连接
+        function connect1() {
+            console.log("普通广播的连接");
+            var socket = new SockJS('/portfolio');
+            stompClient = Stomp.over(socket);
+            if (stompClient == null){
+                console.log("null");
+            }
             stompClient.connect({}, function (frame) {
                 setConnected(true);
+                stompClient.subscribe('/topic', function (data) {
+                    console.log("普通广播" + data);
+                });
             });
         }
+
+        //使用 convertAndSend 实现点对点传送消息
+        function connect2() {
+            var socket = new SockJS('/portfolio');
+            stompClient = Stomp.over(socket);
+            var userId = $("#userId").val();
+            console.log(userId);
+            stompClient.connect({'userId': userId}, function (frame) {
+                setConnected(true);
+                stompClient.subscribe('/queue/position-updates/' + userId , function (data) {
+                    console.log(data);
+                });
+            });
+        }
+
+        //使用 @SendToUser 或 convertAndSendToUser 实现拉取自己的所数据
+        function connect3() {
+            var socket = new SockJS('/portfolio');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                setConnected(true);
+                stompClient.subscribe('/user/queue/position-updates', function (data) {
+                    console.log("使用 @SendToUser  或 convertAndSendToUser 实现拉取自己的所数据" + data);
+                });
+            });
+        }
+
         // 断开socket连接
         function disconnect() {
             if (stompClient != null) {
@@ -30,20 +72,49 @@
             setConnected(false);
             console.log("Disconnected");
         }
-        // 向‘/app/change-notice’服务端发送消息
+        // 向‘/app’服务端发送消息
+
+        //普通广播
         function sendName() {
             var value = document.getElementById('name').value;
             stompClient.send("/app/send", {}, value);
         }
-        connect();
+
+        //使用 convertAndSend 实现点对点传送消息
+        function sendName1() {
+            var value = document.getElementById('name').value;
+            stompClient.send("/app/send1", {}, value);
+        }
+
+        //使用 @SendToUser 实现拉取自己的所数据
+        function sendName2() {
+            var value = document.getElementById('name').value;
+            stompClient.send("/app/send2", {}, value);
+        }
+
+        //使用 convertAndSendToUser 拉取自己的数据 有问题 需要传输 header
+        function sendName3() {
+            var value = document.getElementById('name').value;
+            stompClient.send("/app/send3", {}, value);
+        }
+//        connect();
     </script>
 </head>
 <body>
 <div>
+    <label>登录</label><br/>
+    <input id="userId" placeholder="输入账号" value="1"/>
     <div>
         <button id="connect" onclick="connect();">Connect</button>
         <button id="disconnect" disabled="disabled" onclick="disconnect();">Disconnect</button>
     </div>
+    <br/>
+    <button onclick="connect1();">普通广播监听</button>
+    <br/>
+    <button onclick="connect2();">使用 convertAndSend 实现点对点传送消息监听</button>
+    <br/>
+    <button onclick="connect3();">使用 @SendToUser 或 convertAndSendToUser 实现拉取自己的所数据监听</button>
+    <br/>
     <div id="conversationDiv">
         <p>
             <label>notice content?</label>
@@ -51,7 +122,14 @@
         <p>
             <textarea id="name" rows="5"></textarea>
         </p>
-        <button id="sendName" onclick="sendName();">Send</button>
+
+        <button id="sendName" onclick="sendName();">普通广播</button>
+        <br/>
+        <button id="sendName1" onclick="sendName1();">使用 convertAndSend 实现点对点传送消息</button>
+        <br/>
+        <button id="sendName2" onclick="sendName2();">使用 @SendToUser 实现拉取自己的所数据</button>
+        <br/>
+        <button id="sendName3" onclick="sendName3();">使用 convertAndSendToUser 拉取自己的数据 有问题 需要传输 header</button>
         <p id="response"></p>
     </div>
 </div>
